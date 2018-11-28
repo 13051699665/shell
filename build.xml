@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <project name="antwar" default="build.war" basedir=".">
+    <property name="packages" value="com.*"/>
+    <property name="name" value="antwar"/>
+    <!-- 打包生成的war名字 -->
+    <property name="war.name" value="wbsapiv1" />
+ 
+    <!-- java源文件路径 -->
+    <property name="src.dir" value="${basedir}/src" />
+ 
+    <!-- webapp路径 -->
+    <property name="webapp.dir" value="${basedir}/WebContent" />
+ 
+    <!-- jar包路径 -->
+    <property name="lib.dir" value="${webapp.dir}/WEB-INF/lib" />
+    <!-- 编译源文件路径 -->
+    <property name="build.bin" value="${basedir}/AntBuild/bin" />
+ 
+    <!-- 准备webapp文件路径 -->
+    <property name="buildwar.dest" value="${basedir}/AntBuild/warsrc" />
+ 
+    <!-- 打包war文件路径 -->
+    <property name="war.dest" value="${basedir}/AntBuild/war" />
+
+ 
+    <!-- classpath -->
+    <path id="classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+ 
+    <!-- 初始化 -->
+    <target name="init">
+        <mkdir dir="${build.bin}" />
+        <mkdir dir="${buildwar.dest}" />
+        <mkdir dir="${war.dest}" />
+ 
+        <!-- 复制静态文件 -->
+        <copy todir="${buildwar.dest}" overwrite="true">
+            <fileset dir="${webapp.dir}">
+                <exclude name="/WEB-INF/classes/**" />
+            </fileset>
+        </copy>
+    </target>
+ 
+    <!-- 编译源文件 -->
+    <target name="compile" depends="init">
+        <echo message="Build: " />
+        <javac srcdir="${src.dir}" destdir="${build.bin}" encoding="utf-8" includeantruntime="">
+            <classpath refid="classpath" />
+        </javac>
+ 
+        <!-- 复制编译后的文件 -->
+        <copy todir="${buildwar.dest}/WEB-INF/classes" overwrite="true">
+            <fileset dir="${build.bin}">
+                <include name="**/*.class" />
+            </fileset>
+        </copy>
+    </target>
+ 
+    <!-- 复制项目中的其他的一些资源文件 -->
+    <target name="copyResource" depends="compile">
+        <echo message="Copy resources: " />
+        <copy todir="${buildwar.dest}/WEB-INF/classes" overwrite="true">
+            <fileset dir="${basedir}/src">
+                <include name="mapper/*.xml" />
+                <include name="*.xml" />
+				<include name="*.properties" />
+            </fileset>
+        </copy>
+    </target>
+ 
+    <!-- 打war包 -->
+    <target name="build.war" depends="copyResource">
+        <echo message="Build war: " />
+        <war warfile="${war.dest}/${war.name}.war" webxml="${buildwar.dest}/WEB-INF/web.xml">
+            <fileset dir="${buildwar.dest}" />
+        </war>
+    </target>
+ 
+</project>
